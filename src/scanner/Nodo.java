@@ -23,7 +23,11 @@ public class Nodo {
     public  Nodo(int reglon,String token){
         Reglones.add(reglon);
         this.Token = token;
+        this.TipoToken = "UNDEFINED";
     }
+     public void TokenRep (int reglon){
+         Reglones.add(reglon);
+     }
 
 
     public String getToken() {
@@ -41,6 +45,14 @@ public class Nodo {
     public void setTipoToken(String TipoToken) {
         this.TipoToken = TipoToken;
     }
+    public String getReglones(){
+        String reglones="";
+        for (int i = 0; i <Reglones.size(); i++) {
+            reglones=reglones+" "+Reglones.get(i).toString();
+        }
+        return reglones;
+    }
+    
     
     
 }

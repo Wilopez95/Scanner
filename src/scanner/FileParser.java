@@ -2,6 +2,7 @@ package scanner;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -16,14 +17,18 @@ import java.io.FileInputStream;
 public class FileParser {
     FileInputStream entrada;
     File archivo;
-    Boolean FlagComentarioLinea = false;
-    Boolean FlagComentarioBloque = false;
-    Boolean FlagComentarioBloque2 = false;
-    int numerolinea;
+    private Boolean FlagComentarioLinea = false;
+    private Boolean FlagComentarioBloque = false;
+    private Boolean FlagComentarioBloque2 = false;
+    public ArrayList<Nodo> ListaPalabras = new ArrayList<Nodo>();
     
     
     
-    
+    /*ExtraerTexto
+    *Este metodo recibe el archivo txt que se lee 
+    *y extrae todas las palabras para ponerlas en un string
+    *returna el string texto que contiene el texto del archivo.
+    */
     public String ExtraerTexto(File archivo){
     String texto="";
         try {
@@ -38,16 +43,25 @@ public class FileParser {
         }
     return texto;
 }
-    
+    /*SepararTexto
+     *Recibe un texto y lo separa en reglones 
+     *posteriormente en cada linea lo separa en palabras 
+     *se le aplica el analisis de comentarios a cada palabra 
+     *para analizar los comentarios se emplean banderas ,
+     *si la bandera esta activa entonces el texto esta comentado y se ignora por completo
+     */
+     
     public void SepararTexto(String texto){
         String[] listaReglones = texto.split("\\r?\\n");
         for (int i = 0; i < listaReglones.length; i++) {
             String[] listaPalabras = listaReglones[i].split(" ");
             FlagComentarioLinea = false;
             for (int j = 0; j < listaPalabras.length; j++) {
+                //Pasar todas las palabras a mayusculas
+                listaPalabras[j] = listaPalabras[j].toUpperCase();
+                //Pasar cada palabra a lista de caracteres
                 char[] Tokench = listaPalabras[j].toCharArray();
                 if(Tokench.length>1){
-                //System.out.println("Palabra "+listaPalabras[j] + " Token " + Tokench[0]+Tokench[1]);
                 if(Tokench[0] == '/' && Tokench[1] == '/'){
                     this.FlagComentarioLinea = true;
                 }else if(Tokench[0] == '(' && Tokench[1] == '*'){
@@ -58,16 +72,55 @@ public class FileParser {
                      FlagComentarioBloque = false;
                      break;
                 }
-                //System.out.println("TEST "+Tokench[Tokench.length-1]);
+                }
+                if(Tokench[Tokench.length-1] =='}' ){
+                    FlagComentarioBloque2 = false;
+                     break;
+                }
                 if(!FlagComentarioLinea ){
                     if (!FlagComentarioBloque){
-                        System.out.println("Numero reglon "+i+" Palabra: "+listaPalabras[j]);
+                        if(!FlagComentarioBloque2){  
+                            insertaPalabraEnLista(listaPalabras[j], i);
+                        }
                     }
                     
-                }   
                 }
             }
-            //System.out.println("Lista: "+listaReglones[i]);
+            
+        }
+        verListaPalabras();
+    }
+    
+    private void insertaPalabraEnLista(String palabra, int reglon){
+      
+        if(ListaPalabras.isEmpty()){
+            Nodo n = new Nodo(reglon, palabra);
+            ListaPalabras.add(n);
+        }else{
+            if(!insertarRepetida(reglon, palabra)){
+                Nodo n = new Nodo(reglon, palabra);
+                ListaPalabras.add(n);
+            }
+        }
+        
+    }
+    
+    private boolean insertarRepetida(int reglon , String palabra){
+        for (int i = 0; i < ListaPalabras.size(); i++) {
+                if(ListaPalabras.get(i).getToken().equals(palabra)){ 
+                    //System.out.println("ENTRO");
+                    ListaPalabras.get(i).TokenRep(reglon);        
+                    return true;
+                }
+            }
+        return false;
+    }
+    
+    
+    private void verListaPalabras(){
+        for (int i = 0; i < ListaPalabras.size(); i++) {
+            System.out.println("Linea: "+ListaPalabras.get(i).getReglones()+" , Token: "+ListaPalabras.get(i).getToken()+" Tipo token: "+ListaPalabras.get(i).getTipoToken());
+            
         }
     }
     
